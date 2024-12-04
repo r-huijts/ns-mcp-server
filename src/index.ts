@@ -115,104 +115,109 @@ class DisruptionsServer {
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      if (request.params.name !== 'get_disruptions') {
-        throw new McpError(
-          ErrorCode.MethodNotFound,
-          `Unknown tool: ${request.params.name}`
-        );
-      }
-
       const rawArgs = request.params.arguments || {};
-      const args: GetDisruptionsArgs = {
-        isActive: true,
-        ...rawArgs,
-        ...(rawArgs.isActive !== undefined && {
-          isActive: String(rawArgs.isActive).toLowerCase() === 'true'
-        })
-      };
 
-      if (!isValidDisruptionsArgs(args)) {
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          `${JSON.stringify(request.params.arguments)} Invalid arguments for get_disruptions. Expected {isActive?: boolean, type?: "MAINTENANCE" | "DISRUPTION"}`
-        );
-      }
+      switch (request.params.name) {
+        case 'get_disruptions': {
+          const args: GetDisruptionsArgs = {
+            isActive: true,
+            ...rawArgs,
+            ...(rawArgs.isActive !== undefined && {
+              isActive: String(rawArgs.isActive).toLowerCase() === 'true'
+            })
+          };
 
-      try {
-        const response = await this.axiosInstance.get<Disruption[]>(
-          API_CONFIG.ENDPOINTS.DISRUPTIONS,
-          {
-            params: {
-              isActive: args.isActive,
-              type: args.type,
-            },
+          if (!isValidDisruptionsArgs(args)) {
+            throw new McpError(
+              ErrorCode.InvalidParams,
+              `${JSON.stringify(request.params.arguments)} Invalid arguments for get_disruptions. Expected {isActive?: boolean, type?: "MAINTENANCE" | "DISRUPTION"}`
+            );
           }
-        );
 
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify(response.data, null, 2)
-          }]
-        };
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          return {
-            isError: true,
-            content: [{
-              type: "text",
-              text: `NS API error: ${error.response?.data.message ?? error.message}`
-            }]
-          };
-        }
-        throw error;
-      }
+          try {
+            const response = await this.axiosInstance.get<Disruption[]>(
+              API_CONFIG.ENDPOINTS.DISRUPTIONS,
+              {
+                params: {
+                  isActive: args.isActive,
+                  type: args.type,
+                },
+              }
+            );
 
-      if (request.params.name === 'get_travel_advice') {
-        const rawArgs = request.params.arguments || {};
-        const args: GetTravelAdviceArgs = {
-          ...rawArgs,
-          searchForArrival: rawArgs.searchForArrival === true,
-        };
-
-        if (!isValidTravelAdviceArgs(args)) {
-          throw new McpError(
-            ErrorCode.InvalidParams,
-            `Invalid arguments for get_travel_advice. Expected {fromStation: string, toStation: string, dateTime?: string, searchForArrival?: boolean}`
-          );
-        }
-
-        try {
-          const response = await this.axiosInstance.get<TravelAdvice[]>(
-            API_CONFIG.ENDPOINTS.TRIPS,
-            {
-              params: {
-                fromStation: args.fromStation,
-                toStation: args.toStation,
-                dateTime: args.dateTime,
-                searchForArrival: args.searchForArrival,
-              },
-            }
-          );
-
-          return {
-            content: [{
-              type: "text",
-              text: JSON.stringify(response.data, null, 2)
-            }]
-          };
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
             return {
-              isError: true,
               content: [{
                 type: "text",
-                text: `NS API error: ${error.response?.data.message ?? error.message}`
+                text: JSON.stringify(response.data, null, 2)
               }]
             };
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+              return {
+                isError: true,
+                content: [{
+                  type: "text",
+                  text: `NS API error: ${error.response?.data?.message || error.message || 'Unknown error'}`
+                }]
+              };
+            }
+            throw error;
           }
-          throw error;
         }
+
+        case 'get_travel_advice': {
+          const args: GetTravelAdviceArgs = {
+            fromStation: String(rawArgs.fromStation || ''),
+            toStation: String(rawArgs.toStation || ''),
+            dateTime: rawArgs.dateTime as string | undefined,
+            searchForArrival: rawArgs.searchForArrival === true,
+          };
+
+          if (!isValidTravelAdviceArgs(args)) {
+            throw new McpError(
+              ErrorCode.InvalidParams,
+              `Invalid arguments for get_travel_advice. Expected {fromStation: string, toStation: string, dateTime?: string, searchForArrival?: boolean}`
+            );
+          }
+
+          try {
+            const response = await this.axiosInstance.get<TravelAdvice[]>(
+              API_CONFIG.ENDPOINTS.TRIPS,
+              {
+                params: {
+                  fromStation: args.fromStation,
+                  toStation: args.toStation,
+                  dateTime: args.dateTime,
+                  searchForArrival: args.searchForArrival,
+                },
+              }
+            );
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify(response.data, null, 2)
+              }]
+            };
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+              return {
+                isError: true,
+                content: [{
+                  type: "text",
+                  text: `NS API error: ${error.response?.data?.message || error.message || 'Unknown error'}`
+                }]
+              };
+            }
+            throw error;
+          }
+        }
+
+        default:
+          throw new McpError(
+            ErrorCode.MethodNotFound,
+            `Unknown tool: ${request.params.name}`
+          );
       }
     });
   }
