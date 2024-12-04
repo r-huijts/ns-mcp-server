@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { Disruption, GetDisruptionsArgs, isValidDisruptionsArgs } from './types.js';
+import { TravelAdvice, GetTravelAdviceArgs, isValidTravelAdviceArgs } from './types.js';
 
 dotenv.config();
 
@@ -20,9 +21,10 @@ if (!NS_API_KEY) {
 }
 
 const API_CONFIG = {
-  BASE_URL: 'https://gateway.apiportal.ns.nl/disruptions/v3',
+  BASE_URL: 'https://gateway.apiportal.ns.nl',
   ENDPOINTS: {
-    DISRUPTIONS: ''
+    DISRUPTIONS: '/disruptions/v3',
+    TRIPS: '/reisinformatie-api/api/v3/trips'
   }
 } as const;
 
@@ -83,6 +85,32 @@ class DisruptionsServer {
             },
           },
         },
+        {
+          name: 'get_travel_advice',
+          description: 'Get travel advice between two train stations',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              fromStation: {
+                type: 'string',
+                description: 'Name or code of departure station',
+              },
+              toStation: {
+                type: 'string',
+                description: 'Name or code of destination station',
+              },
+              dateTime: {
+                type: 'string',
+                description: 'Optional departure/arrival time in ISO format (e.g. 2024-03-20T14:00:00+01:00)',
+              },
+              searchForArrival: {
+                type: 'boolean',
+                description: 'If true, dateTime is treated as desired arrival time instead of departure time',
+              },
+            },
+            required: ['fromStation', 'toStation'],
+          },
+        },
       ],
     }));
 
@@ -138,6 +166,53 @@ class DisruptionsServer {
           };
         }
         throw error;
+      }
+
+      if (request.params.name === 'get_travel_advice') {
+        const rawArgs = request.params.arguments || {};
+        const args: GetTravelAdviceArgs = {
+          ...rawArgs,
+          searchForArrival: rawArgs.searchForArrival === true,
+        };
+
+        if (!isValidTravelAdviceArgs(args)) {
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            `Invalid arguments for get_travel_advice. Expected {fromStation: string, toStation: string, dateTime?: string, searchForArrival?: boolean}`
+          );
+        }
+
+        try {
+          const response = await this.axiosInstance.get<TravelAdvice[]>(
+            API_CONFIG.ENDPOINTS.TRIPS,
+            {
+              params: {
+                fromStation: args.fromStation,
+                toStation: args.toStation,
+                dateTime: args.dateTime,
+                searchForArrival: args.searchForArrival,
+              },
+            }
+          );
+
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify(response.data, null, 2)
+            }]
+          };
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            return {
+              isError: true,
+              content: [{
+                type: "text",
+                text: `NS API error: ${error.response?.data.message ?? error.message}`
+              }]
+            };
+          }
+          throw error;
+        }
       }
     });
   }

@@ -151,3 +151,77 @@ export function isValidDisruptionsArgs(args: unknown): args is GetDisruptionsArg
 
   return true;
 }
+
+export interface TravelAdviceStation {
+  name: string;
+  lng: number;
+  lat: number;
+  countryCode?: string;
+  uicCode?: string;
+  plannedDateTime: string;
+  actualDateTime?: string;
+  plannedTrack?: string;
+  actualTrack?: string;
+}
+
+export interface TravelAdviceLeg {
+  idx: string;
+  name: string;
+  direction?: string;
+  cancelled: boolean;
+  origin: TravelAdviceStation;
+  destination: TravelAdviceStation;
+  product: {
+    displayName: string;
+    type: string;
+    number: string;
+    operatorName: string;
+  };
+  stops?: TravelAdviceStation[];
+}
+
+export interface TravelAdviceTrip {
+  uid: string;
+  plannedDurationInMinutes: number;
+  actualDurationInMinutes: number;
+  status: string;
+  legs: TravelAdviceLeg[];
+  crowdForecast?: string;
+  optimal: boolean;
+}
+
+export interface TravelAdvice {
+  source: string;
+  trips: TravelAdviceTrip[];
+}
+
+export interface GetTravelAdviceArgs {
+  fromStation: string;
+  toStation: string;
+  dateTime?: string;
+  searchForArrival?: boolean;
+}
+
+export function isValidTravelAdviceArgs(args: unknown): args is GetTravelAdviceArgs {
+  if (!args || typeof args !== "object") {
+    return false;
+  }
+
+  const typedArgs = args as Record<string, unknown>;
+
+  // Required fields
+  if (typeof typedArgs.fromStation !== "string" || typeof typedArgs.toStation !== "string") {
+    return false;
+  }
+
+  // Optional fields
+  if (typedArgs.dateTime !== undefined && typeof typedArgs.dateTime !== "string") {
+    return false;
+  }
+
+  if (typedArgs.searchForArrival !== undefined && typeof typedArgs.searchForArrival !== "boolean") {
+    return false;
+  }
+
+  return true;
+}
