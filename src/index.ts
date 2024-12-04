@@ -12,14 +12,16 @@ import dotenv from 'dotenv';
 import { Disruption, GetDisruptionsArgs, isValidDisruptionsArgs } from './types.js';
 import { TravelAdvice, GetTravelAdviceArgs, isValidTravelAdviceArgs } from './types.js';
 
+// Load environment variables from .env file
 dotenv.config();
 
+// Ensure NS API key is available
 const NS_API_KEY = process.env.NS_API_KEY;
-
 if (!NS_API_KEY) {
   throw new Error('NS_API_KEY environment variable is required');
 }
 
+// API configuration for NS endpoints
 const API_CONFIG = {
   BASE_URL: 'https://gateway.apiportal.ns.nl',
   ENDPOINTS: {
@@ -28,16 +30,24 @@ const API_CONFIG = {
   }
 } as const;
 
+/**
+ * MCP Server implementation for NS (Dutch Railways) API
+ * Provides tools for:
+ * - Getting travel advice between stations
+ * - Checking current disruptions
+ */
 class DisruptionsServer {
   private server: Server;
   private axiosInstance;
 
   constructor() {
+    // Initialize MCP server with basic configuration
     this.server = new Server(
       { name: 'ns-disruptions-server', version: '1.0.0' },
       { capabilities: { tools: {} } }
     );
 
+    // Configure axios instance with NS API authentication
     this.axiosInstance = axios.create({
       baseURL: API_CONFIG.BASE_URL,
       headers: {
@@ -49,6 +59,10 @@ class DisruptionsServer {
     this.setupErrorHandling();
   }
 
+  /**
+   * Set up error handling for the MCP server
+   * Handles SIGINT for graceful shutdown
+   */
   private setupErrorHandling(): void {
     this.server.onerror = (error) => {
       console.error('[MCP Error]', error);
@@ -64,7 +78,14 @@ class DisruptionsServer {
     this.setupToolHandlers();
   }
 
+  /**
+   * Configure available tools and their handlers
+   * Implements:
+   * - get_disruptions: Fetch current train disruptions
+   * - get_travel_advice: Get travel recommendations between stations
+   */
   private setupToolHandlers(): void {
+    // Register available tools with their schemas
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -114,11 +135,13 @@ class DisruptionsServer {
       ],
     }));
 
+    // Handle tool execution requests
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const rawArgs = request.params.arguments || {};
 
       switch (request.params.name) {
         case 'get_disruptions': {
+          // Parse and validate disruptions request arguments
           const args: GetDisruptionsArgs = {
             isActive: true,
             ...rawArgs,
@@ -135,6 +158,7 @@ class DisruptionsServer {
           }
 
           try {
+            // Call NS API to get disruptions
             const response = await this.axiosInstance.get<Disruption[]>(
               API_CONFIG.ENDPOINTS.DISRUPTIONS,
               {
@@ -166,6 +190,7 @@ class DisruptionsServer {
         }
 
         case 'get_travel_advice': {
+          // Parse and validate travel advice request arguments
           const args: GetTravelAdviceArgs = {
             fromStation: String(rawArgs.fromStation || ''),
             toStation: String(rawArgs.toStation || ''),
@@ -181,6 +206,7 @@ class DisruptionsServer {
           }
 
           try {
+            // Call NS API to get travel advice
             const response = await this.axiosInstance.get<TravelAdvice[]>(
               API_CONFIG.ENDPOINTS.TRIPS,
               {
@@ -222,11 +248,15 @@ class DisruptionsServer {
     });
   }
 
+  /**
+   * Start the MCP server using stdio transport
+   */
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
   }
 }
 
+// Create and start the server
 const server = new DisruptionsServer();
 server.run().catch(console.error);

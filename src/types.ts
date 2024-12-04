@@ -125,11 +125,17 @@ export interface ApiResponse {
 
 export type DisruptionType = "MAINTENANCE" | "DISRUPTION";
 
+/**
+ * Arguments for getting disruptions
+ */
 export interface GetDisruptionsArgs {
-  isActive?: boolean;
-  type?: DisruptionType;
+  isActive?: boolean;  // Filter for active disruptions only
+  type?: DisruptionType;  // Type of disruption to filter for
 }
 
+/**
+ * Type guard for disruption arguments
+ */
 export function isValidDisruptionsArgs(args: unknown): args is GetDisruptionsArgs {
   if (!args || typeof args !== "object") {
     return false;
@@ -152,6 +158,9 @@ export function isValidDisruptionsArgs(args: unknown): args is GetDisruptionsArg
   return true;
 }
 
+/**
+ * Station information in travel advice
+ */
 export interface TravelAdviceStation {
   name: string;
   lng: number;
@@ -164,22 +173,28 @@ export interface TravelAdviceStation {
   actualTrack?: string;
 }
 
+/**
+ * Single leg of a journey (one train/segment)
+ */
 export interface TravelAdviceLeg {
   idx: string;
   name: string;
-  direction?: string;
+  direction?: string;  // Final destination of the train
   cancelled: boolean;
   origin: TravelAdviceStation;
   destination: TravelAdviceStation;
   product: {
-    displayName: string;
+    displayName: string;  // e.g. "Intercity"
     type: string;
-    number: string;
-    operatorName: string;
+    number: string;      // Train number
+    operatorName: string; // e.g. "NS"
   };
-  stops?: TravelAdviceStation[];
+  stops?: TravelAdviceStation[];  // Intermediate stops
 }
 
+/**
+ * Complete trip from origin to destination
+ */
 export interface TravelAdviceTrip {
   uid: string;
   plannedDurationInMinutes: number;
@@ -190,18 +205,27 @@ export interface TravelAdviceTrip {
   optimal: boolean;
 }
 
+/**
+ * Complete travel advice response
+ */
 export interface TravelAdvice {
   source: string;
   trips: TravelAdviceTrip[];
 }
 
+/**
+ * Arguments for getting travel advice
+ */
 export interface GetTravelAdviceArgs {
-  fromStation: string;
-  toStation: string;
-  dateTime?: string;
-  searchForArrival?: boolean;
+  fromStation: string;     // Departure station
+  toStation: string;       // Destination station
+  dateTime?: string;       // Optional departure/arrival time
+  searchForArrival?: boolean;  // If true, dateTime is treated as arrival time
 }
 
+/**
+ * Type guard for travel advice arguments
+ */
 export function isValidTravelAdviceArgs(args: unknown): args is GetTravelAdviceArgs {
   if (!args || typeof args !== "object") {
     return false;
