@@ -7,7 +7,7 @@ import {
   ErrorCode,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import dotenv from 'dotenv';
 import { Disruption, GetDisruptionsArgs, isValidDisruptionsArgs } from './types.js';
 import { TravelAdvice, GetTravelAdviceArgs, isValidTravelAdviceArgs } from './types.js';
@@ -235,14 +235,7 @@ class DisruptionsServer {
                 }]
               };
             }
-            const err = error as Error;
-            return {
-              isError: true,
-              content: [{
-                type: "text",
-                text: `Unexpected error: ${err.message}`
-              }]
-            };
+            throw error;
           }
         }
 
