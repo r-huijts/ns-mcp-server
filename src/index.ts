@@ -129,10 +129,13 @@ class DisruptionsServer {
         };
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            `NS API error: ${error.response?.data.message ?? error.message}`
-          );
+          return {
+            isError: true,
+            content: [{
+              type: "text",
+              text: `NS API error: ${error.response?.data.message ?? error.message}`
+            }]
+          };
         }
         throw error;
       }
