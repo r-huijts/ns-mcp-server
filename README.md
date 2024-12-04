@@ -24,6 +24,32 @@ An MCP server that provides access to NS (Dutch Railways) travel information.
    npm start
    ```
 
+## Integration with Claude Desktop
+
+To add this server to Claude Desktop, update your Claude configuration file (`~/Library/Application Support/Claude/claude_desktop_config.json`) by adding the following to the `mcpServers` object:
+
+```json
+{
+  "mcpServers": {
+    "ns-server": {
+      "command": "node",
+      "args": [
+        "/path/to/ns-server/build/index.js"
+      ],
+      "env": {
+        "NS_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+Make sure to:
+1. Replace `/path/to/ns-server` with the actual path to your installation
+2. Add your NS API key in the `env` section
+
+After updating the configuration, restart Claude Desktop for the changes to take effect.
+
 ## Environment Variables
 
 | Variable | Description |
