@@ -29,3 +29,7 @@ An MCP server that provides access to NS (Dutch Railways) travel information.
 | Variable | Description |
 |----------|-------------|
 | NS_API_KEY | Your NS API key (required) |
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
