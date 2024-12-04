@@ -249,3 +249,35 @@ export function isValidTravelAdviceArgs(args: unknown): args is GetTravelAdviceA
 
   return true;
 }
+
+// Add these new types for the track map feature
+
+export interface TrackMapFeature {
+  type: "Feature";
+  geometry: {
+    type: "LineString";
+    coordinates: [number, number][];
+  };
+  properties: {
+    stations: string[];
+  };
+}
+
+export interface TrackMapResponse {
+  type: "FeatureCollection";
+  features: TrackMapFeature[];
+}
+
+export interface GetTrackMapArgs {
+  stations: string[];
+}
+
+export function isValidTrackMapArgs(args: any): args is GetTrackMapArgs {
+  return (
+    typeof args === "object" &&
+    args !== null &&
+    Array.isArray(args.stations) &&
+    args.stations.length > 0 &&
+    args.stations.every((station: any) => typeof station === "string")
+  );
+}
