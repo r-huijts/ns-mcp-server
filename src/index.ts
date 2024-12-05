@@ -11,6 +11,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { Disruption, GetDisruptionsArgs, isValidDisruptionsArgs } from './types.js';
 import { TravelAdvice, GetTravelAdviceArgs, isValidTravelAdviceArgs } from './types.js';
+import { DeparturesResponse, GetDeparturesArgs, isValidDeparturesArgs } from './types.js';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -26,7 +27,8 @@ const API_CONFIG = {
   BASE_URL: 'https://gateway.apiportal.ns.nl',
   ENDPOINTS: {
     DISRUPTIONS: '/disruptions/v3',
-    TRIPS: '/reisinformatie-api/api/v3/trips'
+    TRIPS: '/reisinformatie-api/api/v3/trips',
+    DEPARTURES: '/reisinformatie-api/api/v2/departures'
   }
 } as const;
 
@@ -132,6 +134,35 @@ class DisruptionsServer {
             required: ['fromStation', 'toStation'],
           },
         },
+        {
+          name: 'get_departures',
+          description: 'Get list of departing trains from a station',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              station: {
+                type: 'string',
+                description: 'Station name or code to get departures for',
+              },
+              dateTime: {
+                type: 'string',
+                description: 'Optional departure time in ISO format (e.g. 2024-03-20T14:00:00+01:00)',
+              },
+              maxJourneys: {
+                type: 'number',
+                description: 'Maximum number of departures to return (default: 40)',
+                minimum: 1,
+                maximum: 100
+              },
+              lang: {
+                type: 'string',
+                description: 'Language for messages (default: nl)',
+                enum: ['nl', 'en']
+              }
+            },
+            required: ['station']
+          }
+        },
       ],
     }));
 
@@ -215,6 +246,49 @@ class DisruptionsServer {
                   toStation: args.toStation,
                   dateTime: args.dateTime,
                   searchForArrival: args.searchForArrival,
+                },
+              }
+            );
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify(response.data, null, 2)
+              }]
+            };
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+              return {
+                isError: true,
+                content: [{
+                  type: "text",
+                  text: `NS API error: ${error.response?.data?.message || error.message || 'Unknown error'}`
+                }]
+              };
+            }
+            throw error;
+          }
+        }
+
+        case 'get_departures': {
+          // Parse and validate departures request arguments
+          if (!isValidDeparturesArgs(rawArgs)) {
+            throw new McpError(
+              ErrorCode.InvalidParams,
+              'Invalid arguments for get_departures. Expected {station: string, dateTime?: string, maxJourneys?: number, lang?: string}'
+            );
+          }
+
+          try {
+            // Call NS API to get departures
+            const response = await this.axiosInstance.get<DeparturesResponse>(
+              API_CONFIG.ENDPOINTS.DEPARTURES,
+              {
+                params: {
+                  station: rawArgs.station,
+                  dateTime: rawArgs.dateTime,
+                  maxJourneys: rawArgs.maxJourneys,
+                  lang: rawArgs.lang
                 },
               }
             );
