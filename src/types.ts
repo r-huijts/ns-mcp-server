@@ -281,3 +281,79 @@ export function isValidTrackMapArgs(args: any): args is GetTrackMapArgs {
     args.stations.every((station: any) => typeof station === "string")
   );
 }
+
+// Add these new interfaces after the existing ones
+
+export interface DepartureProduct {
+  number: string;
+  categoryCode: string;
+  shortCategoryName: string;
+  longCategoryName: string;
+  operatorName: string;
+  operatorCode: string;
+  type: string;
+}
+
+export interface RouteStation {
+  uicCode: string;
+  mediumName: string;
+}
+
+export interface Departure {
+  direction: string;
+  name: string;
+  plannedDateTime: string;
+  plannedTimeZoneOffset: number;
+  actualDateTime: string;
+  actualTimeZoneOffset: number;
+  plannedTrack?: string;
+  actualTrack?: string;
+  product: DepartureProduct;
+  trainCategory: string;
+  cancelled: boolean;
+  routeStations: RouteStation[];
+  messages: string[];
+  departureStatus: string;
+}
+
+export interface DeparturesResponse {
+  payload: {
+    source: string;
+    departures: Departure[];
+  };
+}
+
+export interface GetDeparturesArgs {
+  station: string;
+  dateTime?: string;
+  maxJourneys?: number;
+  lang?: string;
+}
+
+export function isValidDeparturesArgs(args: unknown): args is GetDeparturesArgs {
+  if (!args || typeof args !== "object") {
+    return false;
+  }
+
+  const typedArgs = args as Record<string, unknown>;
+
+  // Required station field
+  if (typeof typedArgs.station !== "string") {
+    return false;
+  }
+
+  // Optional fields
+  if (typedArgs.dateTime !== undefined && typeof typedArgs.dateTime !== "string") {
+    return false;
+  }
+
+  if (typedArgs.maxJourneys !== undefined && typeof typedArgs.maxJourneys !== "number") {
+    return false;
+  }
+
+  if (typedArgs.lang !== undefined && typeof typedArgs.lang !== "string") {
+    return false;
+  }
+
+  return true;
+}
