@@ -2,6 +2,8 @@
 
 An MCP server that provides access to NS (Dutch Railways) travel information.
 
+<a href="https://glama.ai/mcp/servers/tzd5oz5tov"><img width="380" height="200" src="https://glama.ai/mcp/servers/tzd5oz5tov/badge" alt="NS Travel Information Server MCP server" /></a>
+
 ## Setup
 
 1. Clone this repository
