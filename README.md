@@ -21,10 +21,6 @@ An MCP server that provides access to NS (Dutch Railways) travel information.
    ```
    You can get an API key from [NS API Portal](https://apiportal.ns.nl/)
 
-5. Run the server:
-   ```bash
-   npm start
-   ```
 
 ## Integration with Claude Desktop
 
