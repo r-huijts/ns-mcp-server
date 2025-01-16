@@ -9,7 +9,7 @@ import {
 import { Config } from './config/index.js';
 import { NSApiService } from './services/NSApiService.js';
 import { ResponseFormatter } from './utils/ResponseFormatter.js';
-import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs } from './types.js';
+import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs } from './types.js';
 
 class DisruptionsServer {
   private server: Server;
@@ -123,6 +123,20 @@ class DisruptionsServer {
             required: ['station']
           }
         },
+        {
+          name: 'get_ovfiets',
+          description: 'Get OV-fiets availability at a train station',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              stationCode: {
+                type: 'string',
+                description: 'Station code to check OV-fiets availability for (e.g., ASD for Amsterdam Centraal)',
+              }
+            },
+            required: ['stationCode']
+          }
+        },
       ],
     }));
 
@@ -161,6 +175,17 @@ class DisruptionsServer {
               );
             }
             const data = await this.nsApiService.getDepartures(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
+          }
+
+          case 'get_ovfiets': {
+            if (!isValidOVFietsArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_ovfiets'
+              );
+            }
+            const data = await this.nsApiService.getOVFiets(rawArgs);
             return ResponseFormatter.formatSuccess(data);
           }
 

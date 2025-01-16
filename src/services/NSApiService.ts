@@ -5,7 +5,9 @@ import {
   TravelAdvice, 
   GetTravelAdviceArgs,
   DeparturesResponse,
-  GetDeparturesArgs 
+  GetDeparturesArgs,
+  OVFietsResponse,
+  GetOVFietsArgs
 } from '../types.js';
 
 export class NSApiService {
@@ -14,7 +16,8 @@ export class NSApiService {
   private static readonly ENDPOINTS = {
     DISRUPTIONS: '/disruptions/v3',
     TRIPS: '/reisinformatie-api/api/v3/trips',
-    DEPARTURES: '/reisinformatie-api/api/v2/departures'
+    DEPARTURES: '/reisinformatie-api/api/v2/departures',
+    OVFIETS: '/places-api/v2/ovfiets'
   } as const;
 
   constructor(apiKey: string) {
@@ -64,6 +67,18 @@ export class NSApiService {
           maxJourneys: args.maxJourneys,
           lang: args.lang
         },
+      }
+    );
+    return response.data;
+  }
+
+  async getOVFiets(args: GetOVFietsArgs): Promise<OVFietsResponse> {
+    const response = await this.axiosInstance.get<OVFietsResponse>(
+      NSApiService.ENDPOINTS.OVFIETS,
+      {
+        params: {
+          station_code: args.stationCode
+        }
       }
     );
     return response.data;

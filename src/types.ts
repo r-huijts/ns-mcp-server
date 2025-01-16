@@ -357,3 +357,50 @@ export function isValidDeparturesArgs(args: unknown): args is GetDeparturesArgs 
 
   return true;
 }
+
+export interface OpeningHours {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  closesNextDay: boolean;
+}
+
+export interface OVFietsLocation {
+  distance?: number;
+  name: string;
+  stationCode: string;
+  lat: number;
+  lng: number;
+  open: string;
+  description: string;
+  openingHours: OpeningHours[];
+  extra: {
+    serviceType: string;
+    rentalBikes: string;
+    locationCode: string;
+    type: string;
+  };
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+}
+
+export interface OVFietsResponse {
+  payload: {
+    locations: OVFietsLocation[];
+  }[];
+}
+
+export interface GetOVFietsArgs {
+  stationCode: string;
+}
+
+export function isValidOVFietsArgs(args: unknown): args is GetOVFietsArgs {
+  if (!args || typeof args !== "object") {
+    return false;
+  }
+
+  const typedArgs = args as Record<string, unknown>;
+  return typeof typedArgs.stationCode === "string";
+}
