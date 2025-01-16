@@ -1,4 +1,4 @@
-| <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Nederlandse_Spoorwegen_logo.svg" alt="NS Logo" width="300"/> | [![NS Travel Information Server MCP server](https://glama.ai/mcp/servers/tzd5oz5tov/badge)](https://glama.ai/mcp/servers/tzd5oz5tov) |
+| <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Nederlandse_Spoorwegen_logo.svg" alt="NS Logo" width="380"/> | <img src="https://glama.ai/mcp/servers/tzd5oz5tov/badge" alt="NS Travel Information Server MCP server" width="380"/> |
 |:---:|:---:|
 
 # NS Travel Information MCP Server
