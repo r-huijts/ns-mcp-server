@@ -1,6 +1,7 @@
-![NS Logo](https://upload.wikimedia.org/wikipedia/commons/b/b7/Nederlandse_Spoorwegen_logo.svg)
-
-<a href="https://glama.ai/mcp/servers/tzd5oz5tov"><img width="380" height="200" src="https://glama.ai/mcp/servers/tzd5oz5tov/badge" alt="NS Travel Information Server MCP server" /></a>
+<div style="display: flex; align-items: center; justify-content: space-between;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Nederlandse_Spoorwegen_logo.svg" alt="NS Logo" width="45%" style="margin-right: 5%"/>
+  <a href="https://glama.ai/mcp/servers/tzd5oz5tov" style="width: 45%"><img width="100%" src="https://glama.ai/mcp/servers/tzd5oz5tov/badge" alt="NS Travel Information Server MCP server" /></a>
+</div>
 
 # NS Travel Information MCP Server
 
