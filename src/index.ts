@@ -5,66 +5,33 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
   ErrorCode,
-  McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import axios from 'axios';
-import dotenv from 'dotenv';
-import { Disruption, GetDisruptionsArgs, isValidDisruptionsArgs } from './types.js';
-import { TravelAdvice, GetTravelAdviceArgs, isValidTravelAdviceArgs } from './types.js';
-import { DeparturesResponse, GetDeparturesArgs, isValidDeparturesArgs } from './types.js';
+import { Config } from './config/index.js';
+import { NSApiService } from './services/NSApiService.js';
+import { ResponseFormatter } from './utils/ResponseFormatter.js';
+import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs } from './types.js';
 
-// Load environment variables from .env file
-dotenv.config();
-
-// Ensure NS API key is available
-const NS_API_KEY = process.env.NS_API_KEY;
-if (!NS_API_KEY) {
-  throw new Error('NS_API_KEY environment variable is required');
-}
-
-// API configuration for NS endpoints
-const API_CONFIG = {
-  BASE_URL: 'https://gateway.apiportal.ns.nl',
-  ENDPOINTS: {
-    DISRUPTIONS: '/disruptions/v3',
-    TRIPS: '/reisinformatie-api/api/v3/trips',
-    DEPARTURES: '/reisinformatie-api/api/v2/departures'
-  }
-} as const;
-
-/**
- * MCP Server implementation for NS (Dutch Railways) API
- * Provides tools for:
- * - Getting travel advice between stations
- * - Checking current disruptions
- */
 class DisruptionsServer {
   private server: Server;
-  private axiosInstance;
+  private nsApiService: NSApiService;
 
   constructor() {
-    // Initialize MCP server with basic configuration
+    const config = Config.getInstance();
+    
     this.server = new Server(
-      { name: 'ns-disruptions-server', version: '1.0.0' },
+      { 
+        name: config.serverName, 
+        version: config.serverVersion 
+      },
       { capabilities: { tools: {} } }
     );
 
-    // Configure axios instance with NS API authentication
-    this.axiosInstance = axios.create({
-      baseURL: API_CONFIG.BASE_URL,
-      headers: {
-        'Ocp-Apim-Subscription-Key': NS_API_KEY,
-      },
-    });
-
+    this.nsApiService = new NSApiService(config.nsApiKey);
+    
     this.setupHandlers();
     this.setupErrorHandling();
   }
 
-  /**
-   * Set up error handling for the MCP server
-   * Handles SIGINT for graceful shutdown
-   */
   private setupErrorHandling(): void {
     this.server.onerror = (error) => {
       console.error('[MCP Error]', error);
@@ -80,14 +47,7 @@ class DisruptionsServer {
     this.setupToolHandlers();
   }
 
-  /**
-   * Configure available tools and their handlers
-   * Implements:
-   * - get_disruptions: Fetch current train disruptions
-   * - get_travel_advice: Get travel recommendations between stations
-   */
   private setupToolHandlers(): void {
-    // Register available tools with their schemas
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -124,11 +84,11 @@ class DisruptionsServer {
               },
               dateTime: {
                 type: 'string',
-                description: 'Optional departure/arrival time in ISO format (e.g. 2024-03-20T14:00:00+01:00)',
+                description: 'Optional departure/arrival time in ISO format',
               },
               searchForArrival: {
                 type: 'boolean',
-                description: 'If true, dateTime is treated as desired arrival time instead of departure time',
+                description: 'If true, dateTime is treated as desired arrival time',
               },
             },
             required: ['fromStation', 'toStation'],
@@ -146,7 +106,7 @@ class DisruptionsServer {
               },
               dateTime: {
                 type: 'string',
-                description: 'Optional departure time in ISO format (e.g. 2024-03-20T14:00:00+01:00)',
+                description: 'Optional departure time in ISO format',
               },
               maxJourneys: {
                 type: 'number',
@@ -166,171 +126,61 @@ class DisruptionsServer {
       ],
     }));
 
-    // Handle tool execution requests
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const rawArgs = request.params.arguments || {};
 
-      switch (request.params.name) {
-        case 'get_disruptions': {
-          // Parse and validate disruptions request arguments
-          const args: GetDisruptionsArgs = {
-            isActive: true,
-            ...rawArgs,
-            ...(rawArgs.isActive !== undefined && {
-              isActive: String(rawArgs.isActive).toLowerCase() === 'true'
-            })
-          };
-
-          if (!isValidDisruptionsArgs(args)) {
-            throw new McpError(
-              ErrorCode.InvalidParams,
-              `${JSON.stringify(request.params.arguments)} Invalid arguments for get_disruptions. Expected {isActive?: boolean, type?: "MAINTENANCE" | "DISRUPTION"}`
-            );
-          }
-
-          try {
-            // Call NS API to get disruptions
-            const response = await this.axiosInstance.get<Disruption[]>(
-              API_CONFIG.ENDPOINTS.DISRUPTIONS,
-              {
-                params: {
-                  isActive: args.isActive,
-                  type: args.type,
-                },
-              }
-            );
-
-            return {
-              content: [{
-                type: "text",
-                text: JSON.stringify(response.data, null, 2)
-              }]
-            };
-          } catch (error) {
-            if (axios.isAxiosError(error)) {
-              return {
-                isError: true,
-                content: [{
-                  type: "text",
-                  text: `NS API error: ${error.response?.data?.message || error.message || 'Unknown error'}`
-                }]
-              };
+      try {
+        switch (request.params.name) {
+          case 'get_disruptions': {
+            if (!isValidDisruptionsArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_disruptions'
+              );
             }
-            throw error;
-          }
-        }
-
-        case 'get_travel_advice': {
-          // Parse and validate travel advice request arguments
-          const args: GetTravelAdviceArgs = {
-            fromStation: String(rawArgs.fromStation || ''),
-            toStation: String(rawArgs.toStation || ''),
-            dateTime: rawArgs.dateTime as string | undefined,
-            searchForArrival: rawArgs.searchForArrival === true,
-          };
-
-          if (!isValidTravelAdviceArgs(args)) {
-            throw new McpError(
-              ErrorCode.InvalidParams,
-              `Invalid arguments for get_travel_advice. Expected {fromStation: string, toStation: string, dateTime?: string, searchForArrival?: boolean}`
-            );
+            const data = await this.nsApiService.getDisruptions(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
           }
 
-          try {
-            // Call NS API to get travel advice
-            const response = await this.axiosInstance.get<TravelAdvice[]>(
-              API_CONFIG.ENDPOINTS.TRIPS,
-              {
-                params: {
-                  fromStation: args.fromStation,
-                  toStation: args.toStation,
-                  dateTime: args.dateTime,
-                  searchForArrival: args.searchForArrival,
-                },
-              }
-            );
-
-            return {
-              content: [{
-                type: "text",
-                text: JSON.stringify(response.data, null, 2)
-              }]
-            };
-          } catch (error) {
-            if (axios.isAxiosError(error)) {
-              return {
-                isError: true,
-                content: [{
-                  type: "text",
-                  text: `NS API error: ${error.response?.data?.message || error.message || 'Unknown error'}`
-                }]
-              };
+          case 'get_travel_advice': {
+            if (!isValidTravelAdviceArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_travel_advice'
+              );
             }
-            throw error;
-          }
-        }
-
-        case 'get_departures': {
-          // Parse and validate departures request arguments
-          if (!isValidDeparturesArgs(rawArgs)) {
-            throw new McpError(
-              ErrorCode.InvalidParams,
-              'Invalid arguments for get_departures. Expected {station: string, dateTime?: string, maxJourneys?: number, lang?: string}'
-            );
+            const data = await this.nsApiService.getTravelAdvice(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
           }
 
-          try {
-            // Call NS API to get departures
-            const response = await this.axiosInstance.get<DeparturesResponse>(
-              API_CONFIG.ENDPOINTS.DEPARTURES,
-              {
-                params: {
-                  station: rawArgs.station,
-                  dateTime: rawArgs.dateTime,
-                  maxJourneys: rawArgs.maxJourneys,
-                  lang: rawArgs.lang
-                },
-              }
-            );
-
-            return {
-              content: [{
-                type: "text",
-                text: JSON.stringify(response.data, null, 2)
-              }]
-            };
-          } catch (error) {
-            if (axios.isAxiosError(error)) {
-              return {
-                isError: true,
-                content: [{
-                  type: "text",
-                  text: `NS API error: ${error.response?.data?.message || error.message || 'Unknown error'}`
-                }]
-              };
+          case 'get_departures': {
+            if (!isValidDeparturesArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_departures'
+              );
             }
-            throw error;
+            const data = await this.nsApiService.getDepartures(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
           }
-        }
 
-        default:
-          throw new McpError(
-            ErrorCode.MethodNotFound,
-            `Unknown tool: ${request.params.name}`
-          );
+          default:
+            throw ResponseFormatter.createMcpError(
+              ErrorCode.MethodNotFound,
+              `Unknown tool: ${request.params.name}`
+            );
+        }
+      } catch (error) {
+        return ResponseFormatter.formatError(error);
       }
     });
   }
 
-  /**
-   * Start the MCP server using stdio transport
-   */
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
   }
 }
 
-// Create and start the server
 const server = new DisruptionsServer();
 server.run().catch(console.error);
