@@ -16,6 +16,7 @@ Transform your AI assistant into a Dutch railways expert! This MCP server connec
 - "Is there first class quiet workspace available on the Amsterdam to Rotterdam route?"
 - "When's the last train back to Groningen after a night out in Amsterdam?"
 - "Are there any weekend engineering works that might affect my Monday morning class?"
+- "Are there OV-fiets bikes available at Utrecht Centraal for my afternoon meeting?"
 
 ## Setup
 
@@ -74,7 +75,7 @@ This MCP server enables Claude to:
 - Check for service disruptions and engineering works
 - Provide platform information and station facilities
 - Get pricing information for your journey
-
+- Check OV-fiets (bike rental) availability at stations
 
 ## License
 
