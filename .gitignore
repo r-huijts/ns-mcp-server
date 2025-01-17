@@ -1,4 +1,19 @@
+# Dependencies
 node_modules/
-build/
-*.log
+
+# Environment variables
 .env
+
+# Build output
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Cursor IDE files
+.cursorrules
