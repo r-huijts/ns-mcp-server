@@ -1,11 +1,11 @@
 {
-  "name": "ns-server",
+  "name": "ns-mcp-server",
   "version": "0.1.0",
-  "description": "A Model Context Protocol server",
-  "private": true,
+  "description": "Transform your AI assistant into a Dutch railways expert! This MCP server connects Claude to real-time NS (Nederlandse Spoorwegen) travel information, making it your perfect companion for navigating the Netherlands by train.",
+  "private": false,
   "type": "module",
   "bin": {
-    "ns-server": "./build/index.js"
+    "ns-mcp-server": "./build/index.js"
   },
   "files": [
     "build"
@@ -17,7 +17,8 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.0"
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "dotenv": "^16.4.7"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
