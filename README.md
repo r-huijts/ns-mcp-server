@@ -3,6 +3,8 @@
 
 # NS Travel Information MCP Server
 
+[![smithery badge](https://smithery.ai/badge/ns-server)](https://smithery.ai/server/ns-server)
+
 Transform your AI assistant into a Dutch railways expert! This MCP server connects Claude to real-time NS (Nederlandse Spoorwegen) travel information, making it your perfect companion for navigating the Netherlands by train.
 
 ## Real-World Use Cases
@@ -61,6 +63,14 @@ Make sure to:
 
 After updating the configuration, restart Claude Desktop for the changes to take effect.
 
+### Installing via Smithery
+
+To install NS Travel Information Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/ns-server):
+
+```bash
+npx -y @smithery/cli install ns-server --client claude
+```
+
 ## 🔑 Environment Variables
 
 | Variable | Description |
@@ -80,4 +90,3 @@ This MCP server enables Claude to:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
