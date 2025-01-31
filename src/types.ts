@@ -404,3 +404,64 @@ export function isValidOVFietsArgs(args: unknown): args is GetOVFietsArgs {
   const typedArgs = args as Record<string, unknown>;
   return typeof typedArgs.stationCode === "string";
 }
+
+export interface StationInfoArgs {
+  query: string;
+  includeNonPlannableStations?: boolean;
+  limit?: number;
+}
+
+export function isValidStationInfoArgs(args: any): args is StationInfoArgs {
+  return (
+    typeof args === 'object' &&
+    typeof args.query === 'string' &&
+    (args.includeNonPlannableStations === undefined || typeof args.includeNonPlannableStations === 'boolean') &&
+    (args.limit === undefined || (typeof args.limit === 'number' && args.limit >= 1 && args.limit <= 50))
+  );
+}
+
+export interface StationId {
+  uicCode: string;
+  evaCode: string;
+  cdCode: number;
+  code: string;
+}
+
+export interface StationNames {
+  long: string;
+  medium: string;
+  short: string;
+  synonyms: string[];
+}
+
+export interface StationLocation {
+  lat: number;
+  lng: number;
+}
+
+export interface NearbyMeLocationId {
+  value: string;
+  type: string;
+}
+
+export interface Station {
+  id: StationId;
+  stationType: string;
+  names: StationNames;
+  location: StationLocation;
+  tracks: string[];
+  hasKnownFacilities: boolean;
+  availableForAccessibleTravel: boolean;
+  hasTravelAssistance: boolean;
+  areTracksIndependentlyAccessible: boolean;
+  isBorderStop: boolean;
+  country: string;
+  radius: number;
+  approachingRadius: number;
+  startDate: string;
+  nearbyMeLocationId: NearbyMeLocationId;
+}
+
+export interface StationInfoResponse {
+  payload: Station[];
+}

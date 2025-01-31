@@ -9,7 +9,7 @@ import {
 import { Config } from './config/index.js';
 import { NSApiService } from './services/NSApiService.js';
 import { ResponseFormatter } from './utils/ResponseFormatter.js';
-import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs } from './types.js';
+import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs, isValidStationInfoArgs } from './types.js';
 
 class DisruptionsServer {
   private server: Server;
@@ -137,6 +137,32 @@ class DisruptionsServer {
             required: ['stationCode']
           }
         },
+        {
+          name: 'get_station_info',
+          description: 'Get detailed information about a train station',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              query: {
+                type: 'string',
+                description: 'Station name or code to search for',
+              },
+              includeNonPlannableStations: {
+                type: 'boolean',
+                description: 'Include stations where trains do not stop regularly',
+                default: false
+              },
+              limit: {
+                type: 'number',
+                description: 'Maximum number of results to return',
+                minimum: 1,
+                maximum: 50,
+                default: 10
+              }
+            },
+            required: ['query']
+          }
+        },
       ],
     }));
 
@@ -186,6 +212,17 @@ class DisruptionsServer {
               );
             }
             const data = await this.nsApiService.getOVFiets(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
+          }
+
+          case 'get_station_info': {
+            if (!isValidStationInfoArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_station_info'
+              );
+            }
+            const data = await this.nsApiService.getStationInfo(rawArgs);
             return ResponseFormatter.formatSuccess(data);
           }
 
