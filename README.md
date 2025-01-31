@@ -19,6 +19,7 @@ Transform your AI assistant into a Dutch railways expert! This MCP server connec
 - "When's the last train back to Groningen after a night out in Amsterdam?"
 - "Are there any weekend engineering works that might affect my Monday morning class?"
 - "Are there OV-fiets bikes available at Utrecht Centraal for my afternoon meeting?"
+- "Is Eindhoven Strijp-S station wheelchair accessible and what platforms does it have?"
 
 ## Setup
 
@@ -83,6 +84,7 @@ This MCP server enables Claude to:
 - Access real-time departure and arrival information
 - Find optimal travel routes across the Netherlands
 - Check for service disruptions and engineering works
+- Search for detailed station information (facilities, accessibility, tracks)
 - Provide platform information and station facilities
 - Get pricing information for your journey
 - Check OV-fiets (bike rental) availability at stations
