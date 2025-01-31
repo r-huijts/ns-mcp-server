@@ -52,7 +52,7 @@ class DisruptionsServer {
       tools: [
         {
           name: 'get_disruptions',
-          description: 'Get current train disruptions from NS API',
+          description: 'Get comprehensive information about current and planned disruptions on the Dutch railway network. Returns details about maintenance work, unexpected disruptions, alternative transport options, impact on travel times, and relevant advice. Can filter for active disruptions and specific disruption types.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -70,7 +70,7 @@ class DisruptionsServer {
         },
         {
           name: 'get_travel_advice',
-          description: 'Get travel advice between two train stations',
+          description: 'Get detailed travel routes between two train stations, including transfers, real-time updates, platform information, and journey duration. Can plan trips for immediate departure or for a specific future time, with options to optimize for arrival time. Returns multiple route options with status and crowding information.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -84,7 +84,7 @@ class DisruptionsServer {
               },
               dateTime: {
                 type: 'string',
-                description: 'Optional departure/arrival time in ISO format',
+                description: 'Format - date-time (as date-time in RFC3339). Datetime that the user want to depart from his origin or or arrive at his destination',
               },
               searchForArrival: {
                 type: 'boolean',
@@ -96,31 +96,40 @@ class DisruptionsServer {
         },
         {
           name: 'get_departures',
-          description: 'Get list of departing trains from a station',
+          description: 'Get real-time departure information for trains from a specific station, including platform numbers, delays, route details, and any relevant travel notes. Returns a list of upcoming departures with timing, destination, and status information.',
           inputSchema: {
             type: 'object',
             properties: {
               station: {
                 type: 'string',
-                description: 'Station name or code to get departures for',
+                description: 'NS Station code for the station (e.g., ASD for Amsterdam Centraal). Required if uicCode is not provided',
+              },
+              uicCode: {
+                type: 'string',
+                description: 'UIC code for the station. Required if station code is not provided',
               },
               dateTime: {
                 type: 'string',
-                description: 'Optional departure time in ISO format',
+                description: 'Format - date-time (as date-time in RFC3339). Only supported for departures at foreign stations. Defaults to server time (Europe/Amsterdam)',
               },
               maxJourneys: {
                 type: 'number',
-                description: 'Maximum number of departures to return (default: 40)',
+                description: 'Number of departures to return',
                 minimum: 1,
-                maximum: 100
+                maximum: 100,
+                default: 40
               },
               lang: {
                 type: 'string',
-                description: 'Language for messages (default: nl)',
-                enum: ['nl', 'en']
+                description: 'Language for localizing the departures list. Only a small subset of text is translated, mainly notes. Defaults to Dutch',
+                enum: ['nl', 'en'],
+                default: 'nl'
               }
             },
-            required: ['station']
+            oneOf: [
+              { required: ['station'] },
+              { required: ['uicCode'] }
+            ]
           }
         },
         {
@@ -161,6 +170,14 @@ class DisruptionsServer {
               }
             },
             required: ['query']
+          }
+        },
+        {
+          name: 'get_current_time_in_rfc3339',
+          description: 'Get the current server time (Europe/Amsterdam timezone) in RFC3339 format. This can be used as input for other tools that require date-time parameters.',
+          inputSchema: {
+            type: 'object',
+            properties: {}
           }
         },
       ],
@@ -224,6 +241,14 @@ class DisruptionsServer {
             }
             const data = await this.nsApiService.getStationInfo(rawArgs);
             return ResponseFormatter.formatSuccess(data);
+          }
+
+          case 'get_current_time_in_rfc3339': {
+            const now = new Date();
+            return ResponseFormatter.formatSuccess({
+              datetime: now.toISOString(),
+              timezone: 'Europe/Amsterdam'
+            });
           }
 
           default:
