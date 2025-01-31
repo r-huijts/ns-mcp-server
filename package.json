@@ -1,6 +1,6 @@
 {
   "name": "ns-mcp-server",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "Transform your AI assistant into a Dutch railways expert! This MCP server connects Claude to real-time NS (Nederlandse Spoorwegen) travel information, making it your perfect companion for navigating the Netherlands by train.",
   "private": false,
   "type": "module",
