@@ -83,53 +83,6 @@ Make sure to:
 
 After updating the configuration, restart Claude Desktop for the changes to take effect.
 
-## Integration with Claude Desktop
-
-### Option 1: Using NPM Package
-
-Update your Claude configuration file (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "ns-server": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "ns-mcp-server"
-      ],
-      "env": {
-        "NS_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-### Option 2: Using Source Code
-
-```json
-{
-  "mcpServers": {
-    "ns-server": {
-      "command": "node",
-      "args": [
-        "/path/to/ns-server/build/index.js"
-      ],
-      "env": {
-        "NS_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-Make sure to:
-1. Replace `/path/to/ns-server` with the actual path to your installation (if using source)
-2. Add your NS API key in the `env` section
-
-After updating the configuration, restart Claude Desktop for the changes to take effect.
-
 ## Real-World Use Cases
 
 - "Is my usual 8:15 train from Almere to Amsterdam running on time?"
