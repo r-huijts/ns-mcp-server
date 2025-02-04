@@ -465,3 +465,101 @@ export interface Station {
 export interface StationInfoResponse {
   payload: Station[];
 }
+
+export interface RecognizableDestination {
+  code: string;
+  name: string;
+}
+
+export interface ArrivalProduct {
+  number: string;
+  categoryCode: string;
+  shortCategoryName: string;
+  longCategoryName: string;
+  operatorName: string;
+  operatorCode: string;
+  type: string;
+}
+
+export interface ArrivalMessage {
+  message: string;
+  style: string;
+}
+
+export interface Arrival {
+  origin: string;
+  recognizableDestination?: RecognizableDestination;
+  name: string;
+  plannedDateTime: string;
+  plannedTimeZoneOffset: number;
+  actualDateTime: string;
+  actualTimeZoneOffset: number;
+  plannedTrack?: string;
+  actualTrack?: string;
+  product: ArrivalProduct;
+  trainCategory: string;
+  cancelled: boolean;
+  messages: ArrivalMessage[];
+  arrivalStatus: string;
+}
+
+export interface ArrivalsResponse {
+  payload: {
+    source: string;
+    arrivals: Arrival[];
+  };
+}
+
+export interface GetArrivalsArgs {
+  station?: string;
+  uicCode?: string;
+  dateTime?: string;
+  maxJourneys?: number;
+  lang?: string;
+}
+
+export function isValidArrivalsArgs(args: unknown): args is GetArrivalsArgs {
+  if (!args || typeof args !== "object") {
+    return false;
+  }
+
+  const typedArgs = args as Record<string, unknown>;
+
+  // Either station or uicCode must be provided
+  if (!typedArgs.station && !typedArgs.uicCode) {
+    return false;
+  }
+
+  // Check station: should be undefined or string
+  if (typedArgs.station !== undefined && typeof typedArgs.station !== "string") {
+    return false;
+  }
+
+  // Check uicCode: should be undefined or string
+  if (typedArgs.uicCode !== undefined && typeof typedArgs.uicCode !== "string") {
+    return false;
+  }
+
+  // Check dateTime: should be undefined or string
+  if (typedArgs.dateTime !== undefined && typeof typedArgs.dateTime !== "string") {
+    return false;
+  }
+
+  // Check maxJourneys: should be undefined or number between 1 and 100
+  if (typedArgs.maxJourneys !== undefined) {
+    if (typeof typedArgs.maxJourneys !== "number" || 
+        typedArgs.maxJourneys < 1 || 
+        typedArgs.maxJourneys > 100) {
+      return false;
+    }
+  }
+
+  // Check lang: should be undefined or 'nl' or 'en'
+  if (typedArgs.lang !== undefined) {
+    if (typeof typedArgs.lang !== "string" || !["nl", "en"].includes(typedArgs.lang)) {
+      return false;
+    }
+  }
+
+  return true;
+}

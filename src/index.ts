@@ -9,9 +9,9 @@ import {
 import { Config } from './config/index.js';
 import { NSApiService } from './services/NSApiService.js';
 import { ResponseFormatter } from './utils/ResponseFormatter.js';
-import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs, isValidStationInfoArgs } from './types.js';
+import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs, isValidStationInfoArgs, isValidArrivalsArgs } from './types.js';
 
-class DisruptionsServer {
+class NSServer {
   private server: Server;
   private nsApiService: NSApiService;
 
@@ -180,6 +180,44 @@ class DisruptionsServer {
             properties: {}
           }
         },
+        {
+          name: 'get_arrivals',
+          description: 'Get real-time arrival information for trains at a specific station, including platform numbers, delays, origin stations, and any relevant travel notes. Returns a list of upcoming arrivals with timing, origin, and status information.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              station: {
+                type: 'string',
+                description: 'NS Station code for the station (e.g., ASD for Amsterdam Centraal). Required if uicCode is not provided',
+              },
+              uicCode: {
+                type: 'string',
+                description: 'UIC code for the station. Required if station code is not provided',
+              },
+              dateTime: {
+                type: 'string',
+                description: 'Format - date-time (as date-time in RFC3339). Only supported for arrivals at foreign stations. Defaults to server time (Europe/Amsterdam)',
+              },
+              maxJourneys: {
+                type: 'number',
+                description: 'Number of arrivals to return',
+                minimum: 1,
+                maximum: 100,
+                default: 40
+              },
+              lang: {
+                type: 'string',
+                description: 'Language for localizing the arrivals list. Only a small subset of text is translated, mainly notes. Defaults to Dutch',
+                enum: ['nl', 'en'],
+                default: 'nl'
+              }
+            },
+            oneOf: [
+              { required: ['station'] },
+              { required: ['uicCode'] }
+            ]
+          }
+        },
       ],
     }));
 
@@ -251,6 +289,17 @@ class DisruptionsServer {
             });
           }
 
+          case 'get_arrivals': {
+            if (!isValidArrivalsArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_arrivals'
+              );
+            }
+            const data = await this.nsApiService.getArrivals(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
+          }
+
           default:
             throw ResponseFormatter.createMcpError(
               ErrorCode.MethodNotFound,
@@ -269,5 +318,5 @@ class DisruptionsServer {
   }
 }
 
-const server = new DisruptionsServer();
+const server = new NSServer();
 server.run().catch(console.error);

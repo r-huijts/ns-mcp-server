@@ -9,7 +9,9 @@ import {
   OVFietsResponse,
   GetOVFietsArgs,
   StationInfoArgs,
-  StationInfoResponse
+  StationInfoResponse,
+  ArrivalsResponse,
+  GetArrivalsArgs
 } from '../types.js';
 
 export class NSApiService {
@@ -19,6 +21,7 @@ export class NSApiService {
     DISRUPTIONS: '/disruptions/v3',
     TRIPS: '/reisinformatie-api/api/v3/trips',
     DEPARTURES: '/reisinformatie-api/api/v2/departures',
+    ARRIVALS: '/reisinformatie-api/api/v2/arrivals',
     OVFIETS: '/places-api/v2/ovfiets',
     STATIONS: '/nsapp-stations/v3'
   } as const;
@@ -96,6 +99,22 @@ export class NSApiService {
           includeNonPlannableStations: args.includeNonPlannableStations ?? false,
           limit: args.limit ?? 10
         }
+      }
+    );
+    return response.data;
+  }
+
+  async getArrivals(args: GetArrivalsArgs): Promise<ArrivalsResponse> {
+    const response = await this.axiosInstance.get<ArrivalsResponse>(
+      NSApiService.ENDPOINTS.ARRIVALS,
+      {
+        params: {
+          station: args.station,
+          uicCode: args.uicCode,
+          dateTime: args.dateTime,
+          maxJourneys: args.maxJourneys,
+          lang: args.lang
+        },
       }
     );
     return response.data;

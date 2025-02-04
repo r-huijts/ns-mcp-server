@@ -86,16 +86,17 @@ After updating the configuration, restart Claude Desktop for the changes to take
 ## Real-World Use Cases
 
 - "Is my usual 8:15 train from Almere to Amsterdam running on time?"
-- "Are there any delays on the Rotterdam-Den Haag route today."
+- "Are there any delays on the Rotterdam-Den Haag route today?"
 - "What's the best alternative route to Utrecht if there's maintenance on the direct line?"
 - "Which train should I take to arrive at my office in Amsterdam Zuid before 9 AM?"
 - "Which route to Amsterdam has the fewest transfers with a stroller?"
 - "What's the earliest train I can take to make my 10 AM meeting in The Hague?"
-- "Is there first class quiet workspace available on the Amsterdam to Rotterdam route?"
 - "When's the last train back to Groningen after a night out in Amsterdam?"
 - "Are there any weekend engineering works that might affect my Monday morning class?"
 - "Are there OV-fiets bikes available at Utrecht Centraal for my afternoon meeting?"
 - "Is Eindhoven Strijp-S station wheelchair accessible and what platforms does it have?"
+- "What trains are arriving at Utrecht Centraal in the next hour?"
+- "Has the train from Venlo to Schiphol Airport arrived on time?"
 
 ## 🔑 Environment Variables
 
@@ -105,14 +106,26 @@ After updating the configuration, restart Claude Desktop for the changes to take
 
 ## 🌟 Features
 
-This MCP server enables Claude to:
-- Access real-time departure and arrival information
-- Find optimal travel routes across the Netherlands
-- Check for service disruptions and engineering works
-- Search for detailed station information (facilities, accessibility, tracks)
-- Provide platform information and station facilities
-- Get pricing information for your journey
-- Check OV-fiets (bike rental) availability at stations
+This MCP server provides comprehensive access to NS train information through the following endpoints:
+
+### Real-time Train Information
+- **Departures**: Get real-time departure information including platform numbers, delays, and travel notes
+- **Arrivals**: Access upcoming train arrivals with origin stations, platform changes, and status updates
+- **Journey Planning**: Find optimal travel routes with transfers and real-time updates
+- **Service Updates**: Check for disruptions, maintenance work, and engineering activities
+
+### Station Information
+- **Station Details**: Access comprehensive station information including:
+  - Facilities and accessibility features
+  - Platform layouts and track information
+  - OV-fiets (bike rental) availability
+  - Location and approach details
+
+### Additional Features
+- **Multi-language Support**: Information available in Dutch and English
+- **Flexible Queries**: Search by station name, code, or UIC identifier
+- **Time Zones**: Proper handling of time zones for international stations
+- **Status Updates**: Track changes, delays, and cancellations in real-time
 
 ## License
 
