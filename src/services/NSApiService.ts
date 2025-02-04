@@ -11,7 +11,9 @@ import {
   StationInfoArgs,
   StationInfoResponse,
   ArrivalsResponse,
-  GetArrivalsArgs
+  GetArrivalsArgs,
+  PricesResponse,
+  GetPricesArgs
 } from '../types.js';
 
 export class NSApiService {
@@ -22,6 +24,7 @@ export class NSApiService {
     TRIPS: '/reisinformatie-api/api/v3/trips',
     DEPARTURES: '/reisinformatie-api/api/v2/departures',
     ARRIVALS: '/reisinformatie-api/api/v2/arrivals',
+    PRICES: '/reisinformatie-api/api/v3/price',
     OVFIETS: '/places-api/v2/ovfiets',
     STATIONS: '/nsapp-stations/v3'
   } as const;
@@ -114,6 +117,27 @@ export class NSApiService {
           dateTime: args.dateTime,
           maxJourneys: args.maxJourneys,
           lang: args.lang
+        },
+      }
+    );
+    return response.data;
+  }
+
+  async getPrices(args: GetPricesArgs): Promise<PricesResponse> {
+    const response = await this.axiosInstance.get<PricesResponse>(
+      NSApiService.ENDPOINTS.PRICES,
+      {
+        params: {
+          fromStation: args.fromStation,
+          toStation: args.toStation,
+          travelClass: args.travelClass,
+          travelType: args.travelType,
+          isJointJourney: args.isJointJourney,
+          adults: args.adults,
+          children: args.children,
+          routeId: args.routeId,
+          plannedDepartureTime: args.plannedDepartureTime,
+          plannedArrivalTime: args.plannedArrivalTime
         },
       }
     );

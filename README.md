@@ -97,6 +97,8 @@ After updating the configuration, restart Claude Desktop for the changes to take
 - "Is Eindhoven Strijp-S station wheelchair accessible and what platforms does it have?"
 - "What trains are arriving at Utrecht Centraal in the next hour?"
 - "Has the train from Venlo to Schiphol Airport arrived on time?"
+- "How much does a first-class ticket from Amsterdam to Rotterdam cost?"
+- "What's the price for 2 adults and 1 child traveling to Den Haag?"
 
 ## 🔑 Environment Variables
 
@@ -113,6 +115,13 @@ This MCP server provides comprehensive access to NS train information through th
 - **Arrivals**: Access upcoming train arrivals with origin stations, platform changes, and status updates
 - **Journey Planning**: Find optimal travel routes with transfers and real-time updates
 - **Service Updates**: Check for disruptions, maintenance work, and engineering activities
+
+### Pricing Information
+- **Ticket Prices**: Get accurate pricing for single and return journeys
+- **Travel Classes**: Compare prices for first and second class travel
+- **Group Pricing**: Calculate fares for adults and children
+- **Discount Options**: Check joint journey discounts and special offers
+- **Validity Details**: View ticket validity periods and travel conditions
 
 ### Station Information
 - **Station Details**: Access comprehensive station information including:

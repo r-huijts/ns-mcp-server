@@ -9,7 +9,7 @@ import {
 import { Config } from './config/index.js';
 import { NSApiService } from './services/NSApiService.js';
 import { ResponseFormatter } from './utils/ResponseFormatter.js';
-import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs, isValidStationInfoArgs, isValidArrivalsArgs } from './types.js';
+import { isValidDisruptionsArgs, isValidTravelAdviceArgs, isValidDeparturesArgs, isValidOVFietsArgs, isValidStationInfoArgs, isValidArrivalsArgs, isValidPricesArgs } from './types.js';
 
 class NSServer {
   private server: Server;
@@ -218,6 +218,64 @@ class NSServer {
             ]
           }
         },
+        {
+          name: 'get_prices',
+          description: 'Get price information for domestic train journeys, including different travel classes, ticket types, and discounts. Returns detailed pricing information with conditions and validity.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              fromStation: {
+                type: 'string',
+                description: 'UicCode or station code of the origin station',
+              },
+              toStation: {
+                type: 'string',
+                description: 'UicCode or station code of the destination station',
+              },
+              travelClass: {
+                type: 'string',
+                description: 'Travel class to return the price for',
+                enum: ['FIRST_CLASS', 'SECOND_CLASS']
+              },
+              travelType: {
+                type: 'string',
+                description: 'Return the price for a single or return trip',
+                enum: ['single', 'return'],
+                default: 'single'
+              },
+              isJointJourney: {
+                type: 'boolean',
+                description: 'Set to true to return the price including joint journey discount',
+                default: false
+              },
+              adults: {
+                type: 'integer',
+                description: 'Number of adults to return the price for',
+                minimum: 1,
+                default: 1
+              },
+              children: {
+                type: 'integer',
+                description: 'Number of children to return the price for',
+                minimum: 0,
+                default: 0
+              },
+              routeId: {
+                type: 'string',
+                description: 'Specific identifier for the route to take between the two stations. This routeId is returned in the /api/v3/trips call.'
+              },
+              plannedDepartureTime: {
+                type: 'string',
+                description: 'Format - date-time (as date-time in RFC3339). Used to find the correct route if multiple routes are possible.'
+              },
+              plannedArrivalTime: {
+                type: 'string',
+                description: 'Format - date-time (as date-time in RFC3339). Used to find the correct route if multiple routes are possible.'
+              }
+            },
+            required: ['fromStation', 'toStation']
+          }
+        },
       ],
     }));
 
@@ -297,6 +355,17 @@ class NSServer {
               );
             }
             const data = await this.nsApiService.getArrivals(rawArgs);
+            return ResponseFormatter.formatSuccess(data);
+          }
+
+          case 'get_prices': {
+            if (!isValidPricesArgs(rawArgs)) {
+              throw ResponseFormatter.createMcpError(
+                ErrorCode.InvalidParams,
+                'Invalid arguments for get_prices'
+              );
+            }
+            const data = await this.nsApiService.getPrices(rawArgs);
             return ResponseFormatter.formatSuccess(data);
           }
 

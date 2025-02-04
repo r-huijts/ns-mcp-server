@@ -563,3 +563,103 @@ export function isValidArrivalsArgs(args: unknown): args is GetArrivalsArgs {
 
   return true;
 }
+
+export interface PriceValidity {
+  label: string;
+  value: string;
+}
+
+export interface Price {
+  totalPriceInCents: number;
+  pricePerAdultInCents: number;
+  discountInCents: number;
+  operatorName: string;
+  discountType: string;
+  travelClass: 'FIRST_CLASS' | 'SECOND_CLASS';
+  displayName: string;
+  conditionsHeader: string;
+  productId: string;
+  isBestOption: boolean;
+  pricePerChildInCents: number;
+  validity: PriceValidity;
+  conditionsList: string[];
+}
+
+export interface PricesResponse {
+  payload: {
+    prices: Price[];
+  };
+}
+
+export interface GetPricesArgs {
+  fromStation?: string;
+  toStation?: string;
+  travelClass?: 'FIRST_CLASS' | 'SECOND_CLASS';
+  travelType?: 'single' | 'return';
+  isJointJourney?: boolean;
+  adults?: number;
+  children?: number;
+  routeId?: string;
+  plannedDepartureTime?: string;
+  plannedArrivalTime?: string;
+}
+
+export function isValidPricesArgs(args: unknown): args is GetPricesArgs {
+  if (!args || typeof args !== "object") {
+    return false;
+  }
+
+  const typedArgs = args as Record<string, unknown>;
+
+  // Check station fields: should be undefined or string
+  if (typedArgs.fromStation !== undefined && typeof typedArgs.fromStation !== "string") {
+    return false;
+  }
+  if (typedArgs.toStation !== undefined && typeof typedArgs.toStation !== "string") {
+    return false;
+  }
+
+  // Check travelClass: should be undefined or one of the allowed values
+  if (typedArgs.travelClass !== undefined && 
+      !["FIRST_CLASS", "SECOND_CLASS"].includes(typedArgs.travelClass as string)) {
+    return false;
+  }
+
+  // Check travelType: should be undefined or one of the allowed values
+  if (typedArgs.travelType !== undefined && 
+      !["single", "return"].includes(typedArgs.travelType as string)) {
+    return false;
+  }
+
+  // Check isJointJourney: should be undefined or boolean
+  if (typedArgs.isJointJourney !== undefined && typeof typedArgs.isJointJourney !== "boolean") {
+    return false;
+  }
+
+  // Check adults: should be undefined or integer
+  if (typedArgs.adults !== undefined && 
+      (typeof typedArgs.adults !== "number" || !Number.isInteger(typedArgs.adults))) {
+    return false;
+  }
+
+  // Check children: should be undefined or integer
+  if (typedArgs.children !== undefined && 
+      (typeof typedArgs.children !== "number" || !Number.isInteger(typedArgs.children))) {
+    return false;
+  }
+
+  // Check routeId: should be undefined or string
+  if (typedArgs.routeId !== undefined && typeof typedArgs.routeId !== "string") {
+    return false;
+  }
+
+  // Check time fields: should be undefined or string
+  if (typedArgs.plannedDepartureTime !== undefined && typeof typedArgs.plannedDepartureTime !== "string") {
+    return false;
+  }
+  if (typedArgs.plannedArrivalTime !== undefined && typeof typedArgs.plannedArrivalTime !== "string") {
+    return false;
+  }
+
+  return true;
+}
