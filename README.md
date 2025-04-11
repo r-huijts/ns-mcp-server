@@ -79,7 +79,7 @@ Then update your Claude configuration file:
 
 Make sure to:
 1. Replace `/path/to/ns-server` with the actual path to your installation
-2. Add your NS API key in the `env` section
+2. Add your NS API key in the `env` section. It can be obtained from here [https://apiportal.ns.nl/product#product=NsApp](https://apiportal.ns.nl/product#product=NsApp)
 
 After updating the configuration, restart Claude Desktop for the changes to take effect.
 
