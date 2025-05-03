@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/r-huijts-ns-mcp-server-badge.png)](https://mseep.ai/app/r-huijts-ns-mcp-server)
+
 | <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Nederlandse_Spoorwegen_logo.svg" alt="NS Logo" width="380"/> | <img src="https://glama.ai/mcp/servers/tzd5oz5tov/badge" alt="NS Travel Information Server MCP server" width="380"/> |
 |:---:|:---:|
 
