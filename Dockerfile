@@ -26,8 +26,5 @@ COPY --from=builder /app/package-lock.json /app/package-lock.json
 # Install only production dependencies
 RUN npm ci --omit=dev
 
-# Environment variables
-ENV NS_API_KEY=your_api_key_here
-
 # Define the command to run the application
 ENTRYPOINT ["node", "build/index.js"]
