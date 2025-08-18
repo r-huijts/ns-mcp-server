@@ -3,6 +3,7 @@
 
 # NS Travel Information MCP Server
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/r-huijts/ns-mcp-server)](https://archestra.ai/mcp-catalog/r-huijts__ns-mcp-server)
 [![smithery badge](https://smithery.ai/badge/ns-server)](https://smithery.ai/server/ns-server)
 [![npm version](https://badge.fury.io/js/ns-mcp-server.svg)](https://www.npmjs.com/package/ns-mcp-server)
 
