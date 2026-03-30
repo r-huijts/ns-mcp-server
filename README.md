@@ -85,6 +85,10 @@ Make sure to:
 
 After updating the configuration, restart Claude Desktop for the changes to take effect.
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/r-huijts-ns-mcp-server).
+
 ## Real-World Use Cases
 
 - "Is my usual 8:15 train from Almere to Amsterdam running on time?"
