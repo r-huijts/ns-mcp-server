@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ns-server": {
+      "command": "node",
+      "args": ["./build/index.js"],
+      "env": {
+        "NS_API_KEY": "your_ns_api_key_here"
+      }
+    }
+  }
+}
